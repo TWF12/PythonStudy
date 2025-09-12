@@ -6,4 +6,5 @@ print(add(1, 2))
 #如果没有返回值，默认返回None
 def no_return():
     pass
+
 print(no_return())  # None
