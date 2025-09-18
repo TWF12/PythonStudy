@@ -1,10 +1,14 @@
-f1 = open("bill.txt","r",encoding="utf-8")
-f2 = open("bill.txt.bak","w",encoding="utf-8")
-
+f1 = open("bill.txt", "r", encoding="utf-8")
+f2 = open("bill.txt.bak", "w", encoding="utf-8")
 
 # 读取文件内容到bill.txt.bak文件中备份(要求标志位测试的丢弃)
+# for line in f1:
+#     if "测试" in line:
+#         continue
+#     f2.write(line)
+
 for line in f1:
-    if "测式" in line:
+    if line.strip().split(",")[4] == "测试":
         continue
     f2.write(line)
 
