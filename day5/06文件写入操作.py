@@ -15,6 +15,3 @@ f.close() # 关闭文件, 会自动调用flush()将内存中的内容写入硬�
 f = open("test.txt", "w", encoding="utf-8")
 f.write("Hello, Python!\n")
 f.close()
-
-
-with open("test.txt","w",encoding="GBK")
