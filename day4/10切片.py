@@ -8,9 +8,9 @@ my_tuple = (1, 2, 3, 4, 5, 6)
 ret2 = my_tuple[0:3:2]
 print(ret2)
 
-# 对my_str进行切片, 从头到尾
+# 对my_str进行切片, 从头到-2(不包含)
 my_str = "itheima"
-ret3 = my_str[:] #开始和结束都省略, 步长默认是1
+ret3 = my_str[:-2] #开始和结束都省略, 步长默认是1
 print(ret3)
 
 # 对my_str进行切片, 从头到尾, 步长为2

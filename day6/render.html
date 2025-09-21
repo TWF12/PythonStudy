@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <title>Awesome-pyecharts</title>
                 <script type="text/javascript" src="https://assets.pyecharts.org/assets/v5/echarts.min.js"></script>
+            <script type="text/javascript" src="https://assets.pyecharts.org/assets/v5/maps/china.js"></script>
 
     
 </head>
 <body >
-    <div id="de7cfbafaf3544ccb99608c86b08d368" class="chart-container" style="width:900px; height:500px; "></div>
+    <div id="8faf80633b0545d0be373be76ea21ecc" class="chart-container" style="width:900px; height:500px; "></div>
     <script>
-        var chart_de7cfbafaf3544ccb99608c86b08d368 = echarts.init(
-            document.getElementById('de7cfbafaf3544ccb99608c86b08d368'), 'white', {renderer: 'canvas'});
-        var option_de7cfbafaf3544ccb99608c86b08d368 = {
+        var chart_8faf80633b0545d0be373be76ea21ecc = echarts.init(
+            document.getElementById('8faf80633b0545d0be373be76ea21ecc'), 'white', {renderer: 'canvas'});
+        var option_8faf80633b0545d0be373be76ea21ecc = {
     "animation": true,
     "animationThreshold": 2000,
     "animationDuration": 1000,
@@ -37,56 +38,54 @@
     ],
     "series": [
         {
-            "type": "line",
-            "name": "GDP",
-            "connectNulls": false,
-            "xAxisIndex": 0,
-            "symbolSize": 4,
-            "showSymbol": true,
-            "smooth": false,
-            "clip": true,
-            "step": false,
-            "stackStrategy": "samesign",
-            "data": [
-                [
-                    "\u7f8e\u56fd",
-                    30
-                ],
-                [
-                    "\u82f1\u56fd",
-                    20
-                ],
-                [
-                    "\u6cd5\u56fd",
-                    10
-                ]
-            ],
-            "hoverAnimation": true,
+            "type": "map",
+            "name": "\u6d4b\u8bd5\u5730\u56fe",
             "label": {
                 "show": true,
                 "margin": 8,
                 "valueAnimation": false
             },
-            "logBase": 10,
-            "seriesLayoutBy": "column",
-            "lineStyle": {
-                "show": true,
-                "width": 1,
-                "opacity": 1,
-                "curveness": 0,
-                "type": "solid"
-            },
-            "areaStyle": {
-                "opacity": 0
-            },
+            "map": "china",
+            "data": [
+                {
+                    "name": "\u5317\u4eac\u5e02",
+                    "value": 99
+                },
+                {
+                    "name": "\u4e0a\u6d77\u5e02",
+                    "value": 199
+                },
+                {
+                    "name": "\u6e56\u5357\u7701",
+                    "value": 299
+                },
+                {
+                    "name": "\u53f0\u6e7e\u7701",
+                    "value": 399
+                },
+                {
+                    "name": "\u5e7f\u4e1c\u7701",
+                    "value": 499
+                }
+            ],
+            "roam": true,
+            "aspectScale": 0.75,
+            "nameProperty": "name",
+            "selectedMode": false,
+            "zoom": 1,
             "zlevel": 0,
-            "z": 0
+            "z": 2,
+            "seriesLayoutBy": "column",
+            "datasetIndex": 0,
+            "mapValueCalculation": "sum",
+            "showLegendSymbol": true,
+            "emphasis": {}
         }
     ],
     "legend": [
         {
             "data": [
-                "GDP"
+                "\u6d4b\u8bd5\u5730\u56fe"
             ],
             "selected": {},
             "show": true,
@@ -132,90 +131,63 @@
         "padding": 5,
         "order": "seriesAsc"
     },
-    "xAxis": [
-        {
-            "show": true,
-            "scale": false,
-            "nameLocation": "end",
-            "nameGap": 15,
-            "gridIndex": 0,
-            "inverse": false,
-            "offset": 0,
-            "splitNumber": 5,
-            "minInterval": 0,
-            "splitLine": {
-                "show": true,
-                "lineStyle": {
-                    "show": true,
-                    "width": 1,
-                    "opacity": 1,
-                    "curveness": 0,
-                    "type": "solid"
-                }
-            },
-            "animation": true,
-            "animationThreshold": 2000,
-            "animationDuration": 1000,
-            "animationEasing": "cubicOut",
-            "animationDelay": 0,
-            "animationDurationUpdate": 300,
-            "animationEasingUpdate": "cubicOut",
-            "animationDelayUpdate": 0,
-            "data": [
-                "\u7f8e\u56fd",
-                "\u82f1\u56fd",
-                "\u6cd5\u56fd"
-            ]
-        }
-    ],
-    "yAxis": [
-        {
-            "show": true,
-            "scale": false,
-            "nameLocation": "end",
-            "nameGap": 15,
-            "gridIndex": 0,
-            "inverse": false,
-            "offset": 0,
-            "splitNumber": 5,
-            "minInterval": 0,
-            "splitLine": {
-                "show": true,
-                "lineStyle": {
-                    "show": true,
-                    "width": 1,
-                    "opacity": 1,
-                    "curveness": 0,
-                    "type": "solid"
-                }
-            },
-            "animation": true,
-            "animationThreshold": 2000,
-            "animationDuration": 1000,
-            "animationEasing": "cubicOut",
-            "animationDelay": 0,
-            "animationDurationUpdate": 300,
-            "animationEasingUpdate": "cubicOut",
-            "animationDelayUpdate": 0
-        }
-    ],
     "title": [
         {
             "show": true,
-            "text": "GDP\u5c55\u793a",
             "target": "blank",
             "subtarget": "blank",
-            "left": "center",
-            "bottom": "0%",
             "padding": 5,
             "itemGap": 10,
             "textAlign": "auto",
             "textVerticalAlign": "auto",
             "triggerEvent": false
         }
-    ]
+    ],
+    "visualMap": {
+        "show": true,
+        "type": "piecewise",
+        "min": 0,
+        "max": 100,
+        "inRange": {
+            "color": [
+                "#50a3ba",
+                "#eac763",
+                "#d94e5d"
+            ]
+        },
+        "calculable": true,
+        "inverse": false,
+        "splitNumber": 5,
+        "hoverLink": true,
+        "orient": "vertical",
+        "padding": 5,
+        "showLabel": true,
+        "itemWidth": 20,
+        "itemHeight": 14,
+        "borderWidth": 0,
+        "pieces": [
+            {
+                "min": 1,
+                "max": 9,
+                "label": "1-9",
+                "color": "#CCFFFF"
+            },
+            {
+                "min": 10,
+                "max": 99,
+                "label": "10-99",
+                "color": "#FF6666"
+            },
+            {
+                "min": 100,
+                "max": 500,
+                "label": "100-500",
+                "color": "#990033"
+            }
+        ]
+    }
 };
-        chart_de7cfbafaf3544ccb99608c86b08d368.setOption(option_de7cfbafaf3544ccb99608c86b08d368);
+        chart_8faf80633b0545d0be373be76ea21ecc.setOption(option_8faf80633b0545d0be373be76ea21ecc);
     </script>
 </body>
 </html>
