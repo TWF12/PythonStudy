@@ -17,37 +17,27 @@ data_dict = json.loads(data)
 # 数据
 data_list = []
 
-# 拿到所有省数据
-province_data_list = data_dict["areaTree"][0]["children"]
+# 得到河南省各城市数据
+cities_data = data_dict["areaTree"][0]["children"][3]["children"]
 
-# 遍历每一个省份, 并得到省名和确诊人数组成的元组, 把元组添加到列表中
-for province_data in province_data_list:
-    province_name = province_data["name"]
-    if province_name in ("北京", "天津", "上海", "重庆"):
-        province_name += "市"
-    elif province_name in ("内蒙古", "西藏"):
-        province_name += "自治区"
-    elif province_name == "广西":
-        province_name += "壮族自治区"
-    elif province_name == "宁夏":
-        province_name += "回族自治区"
-    elif province_name == "新疆":
-        province_name += "维吾尔自治区"
-    else:
-        province_name += "省"
-    province_confirm = province_data["total"]["confirm"]
-    data_list.append((province_name, province_confirm))
+# 遍历每一个城市, 并得到城市名和确诊人数组成的元组, 把元组添加到列表中
+for city_data in cities_data:
+    city_name = city_data["name"] + "市"
+    city_confirm = city_data["total"]["confirm"]
+    data_list.append((city_name, city_confirm))
 
-
+# 添加济源市数据
+data_list.append(("济源市", 5))
+map = Map()
 # 创建地图对象
 map = Map()
 
 # 添加数据
-map.add("各省份确诊人数", data_list, "china")
+map.add("河南省疫情数据", data_list, "河南")
 
 # 设置全局选项
 map.set_global_opts(
-    title_opts=TitleOpts(title="全国疫情地图"),
+    title_opts=TitleOpts(title="河南省疫情地图"),
     visualmap_opts=VisualMapOpts(
         is_show=True,
         is_piecewise=True,
@@ -63,4 +53,4 @@ map.set_global_opts(
 )
 
 # 生成地图文件
-map.render("全国疫情地图.html")
+map.render("河南省疫情地图.html")
