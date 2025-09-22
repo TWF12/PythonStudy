@@ -30,4 +30,4 @@ map.set_global_opts(
 )
 
 # 生成地图文件
-map.render()
+map.render("基础地图.html")

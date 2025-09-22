@@ -17,4 +17,4 @@ line.set_global_opts(
 )
 
 # 生成图像
-line.render()
+line.render("基础折线图.html")
