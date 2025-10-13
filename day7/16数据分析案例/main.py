@@ -1,7 +1,6 @@
 from pyecharts.charts import Bar
 from pyecharts.options import TitleOpts, LabelOpts, InitOpts
 
-from data_define import Record
 from file_define import TextFileReader, JsonFileReader
 
 # 分别创建txt和json文件读取对象
