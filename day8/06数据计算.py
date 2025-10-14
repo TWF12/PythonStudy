@@ -1,6 +1,6 @@
 from pyspark import SparkConf, SparkContext
 import os
-os.environ['PYSPARK_PYTHON'] = 'D:\\PythonStudy\\.venv\\Scripts\\3.10.exe'
+os.environ['PYSPARK_PYTHON'] = 'D:\\PythonStudy\\.venv\\Scripts\\python.exe'
 
 
 conf = SparkConf().setMaster("local[*]").setAppName("test_spark")
@@ -13,6 +13,12 @@ rdd2 = rdd1.map(lambda x: x * 2)
 
 print(rdd2.collect())
 
+# flatMp算子与map算子类似, 但是flatMap算子可以解除嵌套
+rdd3 = sc.parallelize(["hello world", "hello python", "hello spark"])
+rdd4 = rdd3.map(lambda x: x.split(" "))
+rdd5 = rdd3.flatMap(lambda x: x.split(" "))
+print(rdd4.collect())
+print(rdd5.collect())
 
 
 
