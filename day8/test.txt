@@ -1,0 +1,6 @@
+hello word itcast itcast itheima
+hello java itcast
+hello hadoop itheima
+hello spark itcast
+hello hadoop itcast
+hello hadoop itheima

@@ -1,7 +1,7 @@
 from pyspark import SparkConf, SparkContext
 import os
-os.environ['PYSPARK_PYTHON'] = 'D:\\PythonStudy\\.venv\\Scripts\\python.exe'
 
+os.environ['PYSPARK_PYTHON'] = 'D:\\PythonStudy\\.venv\\Scripts\\python.exe'
 
 conf = SparkConf().setMaster("local[*]").setAppName("test_spark")
 sc = SparkContext(conf=conf)
@@ -20,6 +20,19 @@ rdd5 = rdd3.flatMap(lambda x: x.split(" "))
 print(rdd4.collect())
 print(rdd5.collect())
 
+# reduceByKey算子实现对二元元组按key分组并对value进行聚合
+rdd6 = sc.parallelize([("男", 99), ("女", 98), ("男", 97), ("女", 96)])
+rdd6.reduceByKey(lambda a, b: a + b)
+print(rdd6.collect())
 
+# filter方法过滤rdd中的数据
+rdd7 = sc.parallelize([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+rdd__filter = rdd7.filter(lambda x: x % 2 == 0)
+print(rdd__filter.collect())
+
+# distinct方法去重
+rdd8 = sc.parallelize([1, 2, 3, 4, 5, 1, 2, 3, 4, 5])
+rdd_distinct = rdd8.distinct()
+print(rdd_distinct.collect())
 
 sc.stop()
