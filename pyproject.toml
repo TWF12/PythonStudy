@@ -8,4 +8,5 @@ dependencies = [
     "numpy>=2.3.2",
     "pyecharts>=2.0.8",
     "pymysql>=1.1.2",
+    "pyspark==3.3.1",
 ]
