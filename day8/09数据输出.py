@@ -4,15 +4,17 @@ import os
 # 使用jdk-11与pyspark兼容
 os.environ["JAVA_HOME"] = "D:\\develop\\java\\jdk-11"
 # 指定python解释器路径(数据计算时会调用python解释器)
-os.environ["PYSPARK_PYTHON"] = "D:\\PythonStudy\\.venv\Scripts\\python.exe"
+os.environ["PYSPARK_PYTHON"] = "D:\\PythonStudy\\.venv1\Scripts\\python.exe"
 # 指定hadoop路径(saveAsTextFile算子会调用hadoop)
 os.environ["HADOOP_HOME"] = "D:\\Python UV\\hadoop-3.0.0"
 
 conf = SparkConf().setMaster("local[*]").setAppName("test_spark")
+# 设置默认并行度为1
+# conf.set("spark.default.parallelism", "1")
 
 sc = SparkContext(conf=conf)
 
-rdd = sc.parallelize([1, 2, 3, 4, 5])
+rdd = sc.parallelize([1, 2, 3, 4, 5], 1) # 也可以在这里设置分区数, numSlices可以不写
 
 # collect算子将RDD对象转换成列表
 l = rdd.collect()

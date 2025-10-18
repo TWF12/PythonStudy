@@ -6,7 +6,7 @@ import os
 # 使用jdk-11与pyspark兼容
 os.environ["JAVA_HOME"] = "D:\\develop\\java\\jdk-11"
 # 指定python解释器路径(数据计算时会调用python解释器)
-os.environ["PYSPARK_PYTHON"] = "D:\\PythonStudy\\.venv\Scripts\\python.exe"
+os.environ["PYSPARK_PYTHON"] = "D:\\PythonStudy\\.venv1\Scripts\\python.exe"
 
 # 创建SparkConf对像和SparkContext对象
 conf = SparkConf().setMaster("local[*]").setAppName("test_spark")
@@ -38,7 +38,6 @@ print(rdd7.collect())
 # 获取北京的销售商品
 rdd8 = rdd3.filter(lambda x: x["areaName"] == "北京").map(lambda x: x["category"]).distinct()
 print(rdd8.collect())
-
 
 
 sc.stop()

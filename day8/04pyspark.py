@@ -1,4 +1,5 @@
 from pyspark import SparkConf, SparkContext
+import os
 # 使用jdk-11与pyspark兼容
 os.environ["JAVA_HOME"] = "D:\\develop\\java\\jdk-11"
 
