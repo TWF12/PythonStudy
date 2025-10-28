@@ -18,4 +18,4 @@ def get_n_fib(n = 0):
         i += 1
 
 
-get_n_fib()
+get_n_fib(20)
