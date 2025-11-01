@@ -1,5 +1,4 @@
 # 用3除余2 用5除余3 用7除余2
-from numpy.f2py.crackfortran import endifs
 
 print("0-1000中,用3除余2, 用5除余3, 用7除余2的数有: ")
 for i in range(1001):

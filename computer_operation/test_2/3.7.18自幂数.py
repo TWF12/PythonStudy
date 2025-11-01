@@ -2,17 +2,21 @@ n = int(input("请输入自幂数位数(>=1且<=10): "))
 
 count = 0
 digit_list = []
+# 预存0-9的n次方
+catch  = [i ** n for i in range(10)]
 start, end = pow(10, n-1), pow(10, n)
 for digit in range(start, end):
     sum = 0
     temp = digit
-    digit_per_list = list(map(int, str(digit)))
-    for digit_per in digit_per_list:
-        sum += pow(digit_per, n)
-    # while temp > 0:
-    #     per = temp % 10
-    #     sum += pow(per, n)
-    #     temp = temp // 10
+    # digit_per_list = list(map(int, str(digit)))
+    # for digit_per in digit_per_list:
+    #     sum += pow(digit_per, n)
+    while temp > 0:
+        per = temp % 10
+        sum += catch[per]
+        if sum > digit:
+            break
+        temp = temp // 10
     if sum == digit:
         count += 1
         digit_list.append(digit)
