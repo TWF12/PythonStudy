@@ -20,10 +20,15 @@ class BankerAlgorithm:
         self.Need = []  # 需求矩阵
         self.process_names = []  # 进程名称列表
 
-    def initialize_system(self, available, resources):
-        self.resource_types_count = len(available)
-        self.resources = resources.copy()
-        self.Available = available.copy()
+    def check_initialize_system_data(self, resource_types_count, resources, available):
+        if resource_types_count <= 0:
+            raise ValueError("资源种类数必须为正整数")
+        if len(resources) != resource_types_count or len(available) != resource_types_count:
+            raise ValueError(f"resources和available的长度必须为{resource_types_count}")
+        for i in range(resource_types_count):
+            if resources[i] < 0 or available[i] < 0 or available[i] > resources[i]:
+                resource_name = chr(65 + i)  # 资源名称
+                raise ValueError(f"资源{resource_name}的数量必须是非负数且available不能大于resources")
 
     def check_add_process_data(self, name, max, allocation):
         if self.resource_types_count == 0:
@@ -56,7 +61,14 @@ class BankerAlgorithm:
                 raise ValueError(
                     f"资源{resource_name}的request必须是非负数且request不能大于need, request不能大于available")
 
+    def check_check_safety_data(self):
+        if self.process_count == 0:
+            raise ValueError("系统中无进程, 请先添加进程")
+
     def _check_safety(self, available, allocation, need):
+        # 数据合法性验证
+        self.check_check_safety_data()
+
         # 创建副本并初始化Finish
         Work = available.copy()
         Finish = [False] * self.process_count
@@ -90,6 +102,15 @@ class BankerAlgorithm:
             if not found and not all(Finish):
                 return False, []
         return True, safe_sequence
+
+
+    def check_safety(self):
+        return self._check_safety(self.Available, self.Allocation, self.Need)
+
+    def initialize_system(self, resource_types_count, resources, available):
+        self.resource_types_count = resource_types_count
+        self.resources = resources.copy()
+        self.Available = available.copy()
 
     def add_process(self, name, max, allocation):
         # 数据合法性验证
@@ -148,9 +169,6 @@ class BankerAlgorithm:
         else:
             return False, "分配失败, 分配会导致系统进入不安全状态"
 
-    def check_safety(self):
-        return self._check_safety(self.Available, self.Allocation, self.Need)
-
     def get_system_state(self):
         return {
             "resource_types_count": self.resource_types_count,
@@ -182,7 +200,7 @@ class ResourceAllocationApp:
     def create_widgets(self):
         # 创建主框架
         main_frame = ttk.Frame(self.root, padding="10")
-        main_frame.grid(row=0, column=0, sticky=f"{tk.E}, {tk.W}, {tk.S}, {tk.N}") # 表示主框架占满整个窗口
+        main_frame.grid(row=0, column=0, sticky=f"{tk.E}, {tk.W}, {tk.S}, {tk.N}")  # 表示主框架占满整个窗口
 
         # 配置网格权重, 使其可以自适应窗口大小变化
         self.root.columnconfigure(0, weight=1)
@@ -190,11 +208,9 @@ class ResourceAllocationApp:
         main_frame.columnconfigure(1, weight=1)
         main_frame.rowconfigure(5, weight=1)
 
-
         # 标题
         title_label = ttk.Label(main_frame, text="动态资源分配算法演示程序", font=("Microsoft YaHei", 30, "bold"))
         title_label.grid(row=0, column=0, columnspan=3, pady=(0, 10))
-
 
         # 系统初始化区域
         initial_frame = ttk.LabelFrame(main_frame, text="系统初始化", padding="10")
@@ -218,7 +234,6 @@ class ResourceAllocationApp:
         init_button = ttk.Button(initial_frame, text="初始化系统", command=self.initialize_system)
         init_button.grid(row=0, column=6, padx=(10, 0))
 
-
         # 文件操作区域
         file_frame = ttk.LabelFrame(main_frame, text="文件操作", padding="10")
         file_frame.grid(row=2, column=0, columnspan=3, sticky=f"{tk.W}, {tk.E}", pady=(0, 10))
@@ -229,7 +244,6 @@ class ResourceAllocationApp:
                    command=self.save_to_file).pack(side=tk.LEFT, padx=(0, 100))
         ttk.Button(file_frame, text="重置系统",
                    command=self.reset_system).pack(side=tk.LEFT)
-
 
         # 进程管理区域
         process_frame = ttk.LabelFrame(main_frame, text="进程管理", padding="10")
@@ -253,7 +267,6 @@ class ResourceAllocationApp:
         add_process_button = ttk.Button(process_frame, text="添加进程", command=self.add_process)
         add_process_button.grid(row=0, column=6, padx=(10, 0))
 
-
         # 资源请求区域
         request_frame = ttk.LabelFrame(main_frame, text="资源请求", padding="10")
         request_frame.grid(row=4, column=0, columnspan=3, sticky=f"{tk.W}, {tk.E}", pady=(0, 10))
@@ -274,7 +287,6 @@ class ResourceAllocationApp:
         safety_button = ttk.Button(request_frame, text="安全性检查", command=self.check_safety)
         safety_button.grid(row=0, column=5, padx=(10, 0))
 
-
         # 系统状态显示区域
         state_frame = ttk.LabelFrame(main_frame, text="系统状态", padding="10")
         state_frame.grid(row=5, column=0, columnspan=3, sticky=f"{tk.W}, {tk.E}, {tk.N}, {tk.S}", pady=(0, 10))
@@ -293,8 +305,8 @@ class ResourceAllocationApp:
         state_frame.rowconfigure(0, weight=1)
 
         # 状态栏
-        self.status_vlue = tk.StringVar(value="就绪")
-        status_bar = ttk.Label(main_frame, textvariable=self.status_vlue, relief=tk.SUNKEN)
+        self.status_value = tk.StringVar(value="就绪")
+        status_bar = ttk.Label(main_frame, textvariable=self.status_value, relief=tk.SUNKEN)
         status_bar.grid(row=6, column=0, columnspan=3, sticky=f"{tk.W}, {tk.E}", pady=(10, 0))
 
     def init_sample_data(self):
@@ -316,41 +328,33 @@ class ResourceAllocationApp:
         with open("sample_data.json", "w") as f:
             json.dump(sample_data, f, indent=2)
 
-        self.status_vlue.set("示例数据文件已创建: sample_data.json")
-
+        self.status_value.set("示例数据文件已创建: sample_data.json")
 
     def initialize_system(self):
         try:
             # 获取资源种类数
             resource_types_count = int(self.resource_types_count_value.get())
-            if resource_types_count <= 0:
-                raise ValueError("资源种类数必须为正整数")
 
-            # 解析最大资源数
+            # 获取各类资源的初始数量
             resources_str = self.resources_value.get()
-            resources = [int(x.strip()) for x in resources_str.split(",")]
-            if len(resources) != resource_types_count_value:
-                raise ValueError(f"最大资源数必须包含{resource_types_count_value}个值")
+            resources = [int(x.strip()) for x in re.split(r"[, ，]", resources_str)]
 
-            # 解析可用资源
+            # 获取可用资源向量
             available_str = self.available_value.get()
-            available = [int(x.strip()) for x in available_str.split(",")]
-            if len(available) != resource_types_count_value:
-                raise ValueError(f"可用资源必须包含{resource_types_count_value}个值")
+            available = [int(x.strip()) for x in re.split(r"[, ，]", available_str)]
 
-            # 检查可用资源是否超过最大资源
-            for i in range(resource_types_count_value):
-                if available[i] > resources[i]:
-                    raise ValueError(f"可用资源{i}不能超过最大资源{i}")
+            # 数据合法性验证
+            self.banker.check_initialize_system_data(resource_types_count, resources, available)
 
             # 初始化系统
-            self.banker.initialize_system(available, resources)
+            self.banker.initialize_system(resource_types_count, resources, available)
 
             self.update_display()
-            self.status_vlue.set(f"系统初始化成功: {resource_types_count_value}种资源，最大资源{resources}，可用资源{Available}")
+            self.status_value.set(
+                f"系统初始化成功: {resource_types_count}种资源，各类资源初始数量{resources}，可用资源向量{available}")
 
         except ValueError as e:
-            messagebox.showerror("输入错误", str(e))
+            messagebox.showerror("", str(e))
 
     def add_process(self):
         try:
@@ -375,10 +379,10 @@ class ResourceAllocationApp:
             self.update_process_combobox()
 
             self.update_display()
-            self.status_vlue.set(f"进程{name}添加成功")
+            self.status_value.set(f"进程{name}添加成功")
 
         except ValueError as e:
-            messagebox.showerror("输入错误", str(e))
+            messagebox.showerror("", str(e))
 
     def request_resources(self):
         try:
@@ -399,37 +403,31 @@ class ResourceAllocationApp:
                 if "完成" in message:
                     self.update_process_combobox()
 
-                self.status_vlue.set(message)
-            else:
-                self.status_vlue.set(f"请求失败: {message}")
-
+            # 更新状态栏和显示区域
+            self.status_value.set(message)
             self.update_display()
 
         except ValueError as e:
-            messagebox.showerror("输入错误", str(e))
+            messagebox.showerror("", str(e))
 
     def check_safety(self):
-        """进行安全性检查"""
         try:
-            if self.banker.process_count == 0:
-                messagebox.showwarning("无进程", "请先添加进程")
-                return
-
             is_safe, safe_sequence = self.banker.check_safety()
 
             if is_safe:
                 message = f"系统处于安全状态\n安全序列: {safe_sequence}"
-                messagebox.showinfo("安全性检查", message)
-                self.status_vlue.set("系统处于安全状态")
+                status_value = "系统处于安全状态"
             else:
-                messagebox.showwarning("安全性检查", "系统处于不安全状态！")
-                self.status_vlue.set("系统处于不安全状态")
+                message = "系统处于不安全状态！"
+                status_value = "系统处于不安全状态"
+            # 显示检查结果和更新状态栏
+            messagebox.showwarning("安全性检查", message)
+            self.status_value.set(status_value)
 
         except Exception as e:
-            messagebox.showerror("错误", f"安全性检查失败: {str(e)}")
+            messagebox.showerror("", f"安全性检查失败: {str(e)}")
 
     def load_from_file(self):
-        """从文件加载数据"""
         try:
             file_path = filedialog.askopenfilename(
                 title="选择数据文件",
@@ -438,15 +436,15 @@ class ResourceAllocationApp:
 
             if not file_path:
                 return
-
+            # 读取文件内容
             with open(file_path, "r") as f:
                 data = json.load(f)
 
             # 重置系统
             self.banker.reset()
 
-            # 初始化系统资源
-            self.banker.initialize_system(data["Available"], data["resources"])
+            # 初始化系统
+            self.banker.initialize_system(data["resource_types_count"],data["resources"], data["Available"])
 
             # 添加进程
             for process in data["processes"]:
@@ -455,22 +453,24 @@ class ResourceAllocationApp:
                     process["max"],
                     process["allocation"]
                 )
-
-            # 更新界面
+            # 更新系统初始化区域
             self.resource_types_count_value.set(str(data["resource_types_count"]))
             self.resources_value.set(",".join(str(x) for x in data["resources"]))
-            self.Available_value.set(",".join(str(x) for x in data["Available"]))
+            self.available_value.set(",".join(str(x) for x in data["Available"]))
 
+            # 更新进程下拉列表和显示区域
             self.update_process_combobox()
+
             self.update_display()
 
-            self.status_vlue.set(f"从文件加载成功: {os.path.basename(file_path)}")
+
+            # 更新状态栏
+            self.status_value.set(f"从文件加载成功: {os.path.basename(file_path)}")
 
         except Exception as e:
             messagebox.showerror("加载错误", f"加载文件失败: {str(e)}")
 
     def save_to_file(self):
-        """保存当前状态到文件"""
         try:
             file_path = filedialog.asksaveasfilename(
                 title="保存数据文件",
@@ -484,7 +484,7 @@ class ResourceAllocationApp:
             # 获取系统状态
             state = self.banker.get_system_state()
 
-            # 准备数据
+            # 获取数据
             data = {
                 "resource_types_count": state["resource_types_count"],
                 "resources": state["resources"],
@@ -504,17 +504,16 @@ class ResourceAllocationApp:
             with open(file_path, "w") as f:
                 json.dump(data, f, indent=2)
 
-            self.status_vlue.set(f"状态保存成功: {os.path.basename(file_path)}")
+            self.status_value.set(f"状态保存成功: {os.path.basename(file_path)}")
 
         except Exception as e:
             messagebox.showerror("保存错误", f"保存文件失败: {str(e)}")
 
     def reset_system(self):
-        """重置系统"""
         self.banker.reset()
         self.process_combobox.set("")
         self.update_display()
-        self.status_vlue.set("系统已重置")
+        self.status_value.set("系统已重置")
 
     def update_process_combobox(self):
         self.process_combobox["values"] = self.banker.process_names
@@ -523,38 +522,31 @@ class ResourceAllocationApp:
 
     def update_display(self):
         state = self.banker.get_system_state()  # 获取系统状态
+        # 清空文本框
         self.state_text.delete(1.0, tk.END)
 
         # 显示资源信息
-        self.state_text.insert(tk.END, "=" * 80 + "\n")
-        self.state_text.insert(tk.END, "系统资源状态\n")
-        self.state_text.insert(tk.END, "=" * 80 + "\n\n")
-
         self.state_text.insert(tk.END, f"资源种类数: {state['resource_types_count']}\n")
-        self.state_text.insert(tk.END, f"最大资源实例: {state['resources']}\n")
-        self.state_text.insert(tk.END, f"当前可用资源: {state['Available']}\n\n")
+        self.state_text.insert(tk.END, f"各类资源的初始数量: {state['resources']}\n")
+        self.state_text.insert(tk.END, f"可用资源向量: {state['Available']}\n\n")
 
         # 显示进程信息
         if state["process_count"] > 0:
-            self.state_text.insert(tk.END, "=" * 80 + "\n")
-            self.state_text.insert(tk.END, "进程状态\n")
-            self.state_text.insert(tk.END, "=" * 80 + "\n\n")
-
             # 表头
-            header = f"{'进程':<10} {'最大需求(Max)':<30} {'已分配(Allocation)':<30} {'需求(Need)':<30} {'完成状态':<10}\n"
+            header = f"{'进程\资源情况':<16} {'Max':<30} {'Allocation':<30} {'Need':<30} {'Finish':<10}\n"
             self.state_text.insert(tk.END, header)
             self.state_text.insert(tk.END, "-" * 110 + "\n")
 
             # 进程行
             for i in range(state["process_count"]):
                 process_name = state["process_names"][i]
-                max_str = str(state["max"][i])
-                allocation_str = str(state["allocation"][i])
-                need_str = str(state["need"][i])
+                max_str = str(state["Max"][i])
+                allocation_str = str(state["Allocation"][i])
+                need_str = str(state["Need"][i])
 
                 # 判断进程是否完成
-                is_finished = all(need == 0 for need in state["need"][i])
-                finish_status = "完成" if is_finished else "未完成"
+                is_finished = all(need == 0 for need in state["Need"][i])
+                finish_status = "true" if is_finished else "false"
 
                 row = f"{process_name:<10} {max_str:<30} {allocation_str:<30} {need_str:<30} {finish_status:<10}\n"
                 self.state_text.insert(tk.END, row)
