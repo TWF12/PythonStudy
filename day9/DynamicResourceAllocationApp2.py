@@ -5,7 +5,6 @@ import copy
 import os
 import re
 
-
 class BankerAlgorithm:
     def __init__(self):
         self.reset()
@@ -196,7 +195,6 @@ class BankerAlgorithm:
             "process_names": self.process_names
         }
 
-
 class ResourceAllocationApp:
     def __init__(self, root):
         self.root = root
@@ -307,14 +305,20 @@ class ResourceAllocationApp:
         state_frame = ttk.LabelFrame(main_frame, text="系统状态", padding="10")
         state_frame.grid(row=5, column=0, columnspan=3, sticky=f"{tk.W}, {tk.E}, {tk.N}, {tk.S}", pady=(0, 10))
 
-        # 创建文本框显示系统状态
-        self.state_text = tk.Text(state_frame, height=20, width=140)
-        self.state_text.grid(row=0, column=0, sticky=f"{tk.W}, {tk.E}, {tk.N}, {tk.S}")
+        # # 创建文本框显示系统状态
+        # self.state_text = tk.Text(state_frame, height=20, width=140)
+        # self.state_text.grid(row=0, column=0, sticky=f"{tk.W}, {tk.E}, {tk.N}, {tk.S}")
+
+        # 创建 Treeview 来显示表格
+        self.state_tree = ttk.Treeview(state_frame, show="headings")
+        self.state_tree.grid(row=0, column=0, sticky=f"{tk.W}, {tk.E}, {tk.N}, {tk.S}")
+
+
 
         # 添加滚动条
-        scrollbar = ttk.Scrollbar(state_frame, orient=tk.VERTICAL, command=self.state_text.yview)
+        scrollbar = ttk.Scrollbar(state_frame, orient=tk.VERTICAL, command=self.state_tree.yview)
         scrollbar.grid(row=0, column=1, sticky=f"{tk.N}, {tk.S}")
-        self.state_text.configure(yscrollcommand=scrollbar.set)
+        self.state_tree.configure(yscrollcommand=scrollbar.set)
 
         # 配置网格权重
         state_frame.columnconfigure(0, weight=1)
@@ -324,6 +328,25 @@ class ResourceAllocationApp:
         self.status_value = tk.StringVar(value="就绪")
         status_bar = ttk.Label(main_frame, textvariable=self.status_value, relief=tk.SUNKEN)
         status_bar.grid(row=6, column=0, columnspan=3, sticky=f"{tk.W}, {tk.E}", pady=(10, 0))
+
+        # 配置 Treeview 样式
+        style = ttk.Style()
+        style.configure("Treeview", rowheight=25)
+        style.configure("Treeview.Heading", font=('Microsoft YaHei', 10, 'bold'))
+
+        # 配置 Treeview 样式
+        style = ttk.Style()
+        style.configure("Treeview", rowheight=25, background="white", fieldbackground="white")
+        style.configure("Treeview.Heading", font=('Microsoft YaHei', 10, 'bold'))
+
+        # 添加网格线样式
+        style.configure("Treeview", font=('Microsoft YaHei', 10))
+        style.map('Treeview', background=[('selected', '#0078d7')])
+
+        # 创建自定义样式使线条更明显
+        style.layout("Treeview", [
+            ('Treeview.treearea', {'sticky': 'nswe'})
+        ])
 
     # 初始化测试数据
     def initialize_test_data(self):
@@ -424,6 +447,7 @@ class ResourceAllocationApp:
 
         except ValueError as e:
             messagebox.showerror("", str(e))
+            self.status_value.set(str(e))
 
     # 添加进程
     def add_process(self):
@@ -512,11 +536,13 @@ class ResourceAllocationApp:
                 title="选择数据文件",
                 filetypes=[("JSON文件", "*.json"), ("所有文件", "*.*")]
             )
+
             if not file_path:
                 return
             # 读取文件内容
             with open(file_path, "r") as f:
                 data = json.load(f)
+
             # 重置系统
             self.banker.reset()
 
@@ -595,79 +621,117 @@ class ResourceAllocationApp:
         self.update_display()
         self.status_value.set("系统已重置")
 
-    # 更行进程下拉列表
+    # 更新进程下拉列表
     def update_process_combobox(self):
         self.process_combobox["values"] = self.banker.process_names
         if self.banker.process_names:
             self.process_combobox.current(0)
-
-    # 更新显示区域
+    # 更新系统状态显示区域
     def update_display(self):
-        state = self.banker.get_system_state()  # 获取系统状态
-        # 清空文本框
-        self.state_text.delete(1.0, tk.END)
+        state = self.banker.get_system_state()
+        
+        # 清空 Treeview
+        for item in self.state_tree.get_children():
+            self.state_tree.delete(item)
 
-        # 更新系统初始化区域和资源信息
-        if state["resource_types_count"] != 0 and state["resources"] and state["Available"]: # 避免重置时显示空数据
+        # 更新系统初始化区域的数据
+        if state["resource_types_count"] != 0 and state["resources"] and state["Available"]:
             self.resource_types_count_value.set(str(state["resource_types_count"]))
             self.resources_value.set(",".join(str(x) for x in state["resources"]))
             self.available_value.set(",".join(str(x) for x in state["Available"]))
-
-            self.state_text.insert(tk.END, f"资源种类数: {state['resource_types_count']}\n")
-            self.state_text.insert(tk.END, f"各类资源的初始数量: {state['resources']}\n")
-            self.state_text.insert(tk.END, f"可用资源向量: {state['Available']}\n\n")
-
-        # 生成资源字母标题
-        if state["resource_types_count"] > 0:
+        
+        # 清除所有列
+        self.state_tree["columns"] = []
+        
+        # 如果有进程数据，创建表格
+        if state["process_count"] > 0 and state["resource_types_count"] > 0:
+            # 创建列结构 - 包含 Available 作为最后一列
+            columns = ["进程", "Max", "Allocation", "Need", "Available"]
+            
+            # 设置列
+            self.state_tree["columns"] = columns
+            
+            # 配置列标题
+            # 第一行：主要标题
+            self.state_tree.heading("#0", text="序号")
+            self.state_tree.column("#0", width=50, anchor="center", stretch=False)
+            
+            for col in columns:
+                self.state_tree.heading(col, text=col)
+                if col == "进程":
+                    self.state_tree.column(col, width=70, anchor="center", stretch=False)
+                else:
+                    self.state_tree.column(col, width=130, anchor="center", stretch=False)
+            
+            # 添加分隔线效果 - 插入表头行
+            self.state_tree.insert("", "end", text="", values=["─"*8] + ["─"*12]*4, tags=("separator",))
+            self.state_tree.tag_configure("separator", foreground="gray", font=('Microsoft YaHei', 8))
+            
+            # 第二行：资源类型标题
             resource_letters = [chr(65 + i) for i in range(state["resource_types_count"])]
-            resource_header = "   ".join(resource_letters)
-            self.state_text.insert(tk.END, f"资源类型: {resource_header}\n")
-
-        # 显示进程信息（表格形式）
-        if state["process_count"] > 0:
-
-            # 表头
-            header = "+--------------+---------------+---------------+---------------+---------------+\n"
-            header += "|     进程     |      Max      |  Allocation   |     Need      |   Available   |\n"
-            header += "+--------------+---------------+---------------+---------------+---------------+\n"
-            self.state_text.insert(tk.END, header)
-
-            # 资源名称
-            if state["resource_types_count"] > 0:
-                resource_names = [chr(65 + i) for i in range(state["resource_types_count"])]
-                sub_header = "|              |"
-                for _ in range(4):
-                    sub_header += f"  {'  '.join(resource_names):<13}|"
-                self.state_text.insert(tk.END, sub_header + "\n")
-                self.state_text.insert(tk.END,
-                                       "+--------------+---------------+---------------+---------------+---------------+\n")
-
-            # 进程数据行
+            resource_header = ["资源类型"]
+            
+            # 为每个资源组添加资源类型
+            for _ in range(3):  # Max, Allocation, Need 三个组
+                resource_header.append("  ".join(resource_letters))
+            
+            # Available 的资源类型
+            resource_header.append("  ".join(resource_letters))
+            
+            # 插入标题行
+            self.state_tree.insert("", "end", text="", values=resource_header, tags=("header",))
+            self.state_tree.tag_configure("header", background="#f0f0f0", font=('Microsoft YaHei', 10, 'bold'))
+            
+            # 添加表头下面的分隔线
+            self.state_tree.insert("", "end", text="", values=["─"*8] + ["─"*12]*4, tags=("separator",))
+            
+            # 添加进程数据行（隔行变色）
             for i in range(state["process_count"]):
                 process_name = state["process_names"][i]
-
-                # 格式化数据
-                def format_vector(vec):
-                    return " ".join(f"{num:2}" for num in vec)
-
-                max_str = format_vector(state["Max"][i])
-                allocation_str = format_vector(state["Allocation"][i])
-                need_str = format_vector(state["Need"][i])
-
-                # Available只在第一行显示
+                
+                # 构建行数据
+                row_data = [process_name]
+                
+                # 添加 Max 数据（格式化为字符串）
+                max_str = " ".join(f"{num:2}" for num in state["Max"][i])
+                row_data.append(max_str)
+                
+                # 添加 Allocation 数据
+                alloc_str = " ".join(f"{num:2}" for num in state["Allocation"][i])
+                row_data.append(alloc_str)
+                
+                # 添加 Need 数据
+                need_str = " ".join(f"{num:2}" for num in state["Need"][i])
+                row_data.append(need_str)
+                
+                # 添加 Available 数据（只在第一行显示）
                 if i == 0:
-                    avail_str = format_vector(state["Available"])
+                    avail_str = " ".join(f"{num:2}" for num in state["Available"])
+                    row_data.append(avail_str)
                 else:
-                    avail_str = ""
-
-                row = f"| {process_name:<12} | {max_str:<13} | {allocation_str:<13} | {need_str:<13} | {avail_str:<13} |\n"
-                self.state_text.insert(tk.END, row)
-                self.state_text.insert(tk.END,
-                                       "+--------------+---------------+---------------+---------------+---------------+\n")
-
-        # 自动滚动到顶部
-        self.state_text.see(1.0)
-
+                    row_data.append("")
+                
+                # 根据行号设置不同的背景色
+                if i % 2 == 0:
+                    row_tag = "evenrow"
+                else:
+                    row_tag = "oddrow"
+                
+                # 插入行
+                self.state_tree.insert("", "end", text=str(i+1), values=row_data, tags=(row_tag,))
+                
+                # 在每行后添加细分隔线（可选）
+                if i < state["process_count"] - 1:  # 如果不是最后一行
+                    self.state_tree.insert("", "end", text="", values=[" "] + ["─"*12]*4, tags=("rowseparator",))
+            
+            # 配置行样式
+            self.state_tree.tag_configure("evenrow", background="white")
+            self.state_tree.tag_configure("oddrow", background="#f9f9f9")
+            self.state_tree.tag_configure("rowseparator", foreground="#d0d0d0", font=('Microsoft YaHei', 8))
+            
+            # 添加表格底部边框
+            self.state_tree.insert("", "end", text="", values=["═"*8] + ["═"*12]*4, tags=("bottom",))
+            self.state_tree.tag_configure("bottom", foreground="black", font=('Microsoft YaHei', 8))
 
 def main():
     # 创建主窗口
@@ -675,7 +739,6 @@ def main():
     # 创建动态资源分配程序的一个实例
     app = ResourceAllocationApp(root)
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()
